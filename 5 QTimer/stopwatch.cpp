@@ -4,6 +4,7 @@ StopWatch::StopWatch(QObject *parent)
     : QObject{parent}
 {
     timer_ = new QTimer;
+    connect(timer_, &QTimer::timeout, this, &StopWatch::acceptTimeoutSlot);
 }
 
 StopWatch::~StopWatch(){
@@ -30,6 +31,10 @@ void StopWatch::stopTimer(){
 
 void StopWatch::refreshTimer(){
     duration_timer_ = 0;
+}
+
+void StopWatch:: acceptTimeoutSlot(){
+    emit sendTimeoutSig();
 }
 
 

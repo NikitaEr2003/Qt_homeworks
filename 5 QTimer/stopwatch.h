@@ -9,7 +9,6 @@ class StopWatch : public QObject
 public:
     explicit StopWatch(QObject *parent = nullptr);
     ~StopWatch();
-    QTimer * timer_;
     void setTimeTimer(int time);
     double getTimeTimer();
     void incrementTimer();
@@ -17,8 +16,12 @@ public:
     void refreshTimer();
 private:
      double duration_timer_ = 0;
-
+     QTimer * timer_;
+signals:
+     void sendTimeoutSig();
 public slots:
+     void acceptTimeoutSlot();
+
 
 };
 

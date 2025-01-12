@@ -16,8 +16,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_circle_->setEnabled(false);
     stopwatch_ = new StopWatch(this);
     ui->label_status_->setStyleSheet("QLabel { color : red; }");
-    connect( stopwatch_->timer_, &QTimer::timeout,this, &MainWindow::acceptTime);
-    ui->textBrowser_time_circle_->setAlignment(Qt::AlignCenter);
+    connect( stopwatch_, &StopWatch::sendTimeoutSig,this, &MainWindow::acceptTime);
+
 }
 
 MainWindow::~MainWindow()
@@ -72,7 +72,7 @@ void MainWindow::on_pushButton_circle__clicked()
     if(number_of_circle_ == 1)
     {
         ui->textBrowser_time_circle_->append(QString("Круг № %1 Время: %2").arg(number_of_circle_).arg(time,1,'f',1));
-        time_circle_ = time; // 4
+        time_circle_ = time;
     }else
     {
         double new_time = time-time_circle_;
