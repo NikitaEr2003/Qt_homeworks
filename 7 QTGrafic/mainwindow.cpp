@@ -11,6 +11,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     connect(this, &MainWindow::graficReady, this, &MainWindow::showGrafic);
+    chart = new QChart( );
+    chartView = new QChartView(chart);
+    series = new QLineSeries;
 }
 
 MainWindow::~MainWindow()
@@ -18,6 +21,7 @@ MainWindow::~MainWindow()
     delete ui;
     delete chart;
     delete chartView;
+    delete series;
 }
 
 
@@ -228,12 +232,12 @@ void MainWindow::on_pb_start_clicked()
                                                  * Тут необходимо реализовать код наполнения серии
                                                  * и вызов сигнала для отображения графика
                                                  */
-                                                QLineSeries* series = new QLineSeries;
+
                                                 for(int i =0; i < FD; i++){
                                                     series->append(i, res[i]);
                                                 }
 
-                                                emit graficReady(series);
+                                                emit graficReady();
 
                                              };
 
@@ -244,15 +248,13 @@ void MainWindow::on_pb_start_clicked()
 
 
 }
-void MainWindow::showGrafic(QLineSeries* series){
+void MainWindow::showGrafic(){
 
 
-    chart = new QChart( );
     chart->addSeries(series);
     chart->legend()->setVisible(false);
     chart->createDefaultAxes();
     chart->setTitle("Первая секунда");
-    chartView = new QChartView(chart);
     chartView->resize(600,600);
     chartView->show( );
 }

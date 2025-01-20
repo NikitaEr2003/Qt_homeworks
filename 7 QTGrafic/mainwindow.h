@@ -42,11 +42,11 @@ public:
 private slots:
     void on_pb_path_clicked();
     void on_pb_start_clicked();
-    void showGrafic(QLineSeries * ptr);
+    void showGrafic();
 
 
 signals:
-    void graficReady(QLineSeries * ptr);
+    void graficReady();
 
 private:
     Ui::MainWindow *ui;
@@ -58,6 +58,7 @@ private:
     QVector<double> mins, maxs;
     QChart* chart;
     QChartView* chartView;
+    QLineSeries* series;
     QGridLayout *layout;
 
 };
