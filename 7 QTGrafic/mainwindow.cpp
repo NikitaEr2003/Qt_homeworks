@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
     chart = new QChart( );
     chartView = new QChartView(chart);
     series = new QLineSeries;
+
 }
 
 MainWindow::~MainWindow()
@@ -228,13 +229,18 @@ void MainWindow::on_pb_start_clicked()
                                                 mins = FindMin(res);
                                                 DisplayResult(mins, maxs);
 
+                                                series->clear();
                                                 /*
                                                  * Тут необходимо реализовать код наполнения серии
                                                  * и вызов сигнала для отображения графика
                                                  */
 
+                                                srand(static_cast<unsigned>(time(0)));
+
+
                                                 for(int i =0; i < FD; i++){
-                                                    series->append(i, res[i]);
+                                                    double number = -5 + rand( ) % 100;
+                                                    series->append(i+number, res[i]);
                                                 }
 
                                                 emit graficReady();
@@ -250,6 +256,10 @@ void MainWindow::on_pb_start_clicked()
 }
 void MainWindow::showGrafic(){
 
+
+    if (chart->series().contains(series)) {
+        chart->removeSeries(series);
+    }
 
     chart->addSeries(series);
     chart->legend()->setVisible(false);
