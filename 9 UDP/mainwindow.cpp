@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(udpWorker, &UDPworker::sig_sendTimeToGUI, this, &MainWindow::DisplayTime);
     connect(udpWorker, &UDPworker::sig_sendTextToGUI, this, &MainWindow::DisplayText);
-    connect(this, &MainWindow::sig_SendTypeOFButton, udpWorker,&UDPworker::setTypeOfButton);
+
 
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, [&]{
@@ -24,8 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
 
         outStr << dateTime;
 
-        udpWorker->SendDatagram(dataToSend);
-        //timer->start(TIMER_DELAY); излишнее
+        udpWorker->SendDatagram(dataToSend, Message::TIME);
+
 
     });
 
@@ -38,7 +38,7 @@ MainWindow::~MainWindow()
 
 
 void MainWindow::on_pb_start_clicked()
-{   emit sig_SendTypeOFButton(TypeOFButton::BUTTON_TIME);
+{
     timer->start(TIMER_DELAY);
 }
 
@@ -62,7 +62,7 @@ void MainWindow::DisplayText(QString data)
     if(counterTxT % 20 == 0){
         ui->te_result->clear();
     }
-
+    qDebug() << counterTxT;
     int size = data.toLocal8Bit().size();
     QString Addr = udpWorker->GetSendlerAddr();
     QString Port = udpWorker->GetSendlerPort();
@@ -87,11 +87,10 @@ void MainWindow::on_pb_stop_clicked()
 void MainWindow::on_pb_send_data__clicked()
 
 {   QString str = ui->te_data_->text();
-    emit sig_SendTypeOFButton(TypeOFButton::BUTTON_TEXT);
     QByteArray dataToSend;
     QDataStream outStr(&dataToSend, QIODevice::WriteOnly);
     outStr << str;
-    udpWorker->SendDatagram(dataToSend);
+    udpWorker->SendDatagram(dataToSend, Message::TEXT);
 
 }
 

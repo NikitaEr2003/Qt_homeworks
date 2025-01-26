@@ -4,12 +4,12 @@
 #include <QUdpSocket>
 #include <QNetworkDatagram>
 #include <QDateTime>
-enum TypeOFButton{
-    BUTTON_TIME = 0,
-    BUTTON_TEXT
-};
 
 #define BIND_PORT 12345
+enum Message{
+    TIME = 0,
+    TEXT
+};
 
 class UDPworker : public QObject
 {
@@ -18,7 +18,7 @@ public:
     explicit UDPworker(QObject *parent = nullptr);
     void InitSocket( void );
     void ReadDatagram( QNetworkDatagram datagram);
-    void SendDatagram(QByteArray data );
+    void SendDatagram(QByteArray data, Message message);
 
     void ReadDatagramText(QNetworkDatagram datagram);
     void SendDatagramText(QByteArray data );
@@ -27,14 +27,14 @@ public:
 
 private slots:
     void readPendingDatagrams(void);
-
+    void readPendingDatagramsText(void);
 public slots:
-    void setTypeOfButton( TypeOFButton);
 private:
     QUdpSocket* serviceUdpSocket;
-    TypeOFButton BUTTON;
+    QUdpSocket *serviceUdpSocketMessage;
     QString SendlerAddr;
     QString SendlerPort;
+    Message message_;
 
 signals:
     void sig_sendTimeToGUI(QDateTime data);

@@ -27,7 +27,6 @@ private slots:
     void on_pb_send_data__clicked();
 
 signals:
-    void sig_SendTypeOFButton(TypeOFButton);
 
 private:
     Ui::MainWindow *ui;
