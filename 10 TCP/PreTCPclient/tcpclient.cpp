@@ -15,6 +15,7 @@ QDataStream &operator >>(QDataStream &out, ServiceHeader &data){
     out >> data.len;
     return out;
 };
+
 QDataStream &operator <<(QDataStream &in, ServiceHeader &data){
 
     in << data.id;
@@ -25,6 +26,17 @@ QDataStream &operator <<(QDataStream &in, ServiceHeader &data){
     return in;
 };
 
+QDataStream &operator >> (QDataStream &in, StatServer &data){
+
+    in >> data.incBytes;
+    in >> data.sendBytes;
+    in >> data.revPck;
+    in >> data.sendPck;
+    in >> data.workTime;
+    in >> data.clients;
+
+    return in;
+};
 
 
 /*
@@ -36,8 +48,12 @@ TCPclient::TCPclient(QObject *parent) : QObject(parent)
 {
     socket= new QTcpSocket(this);
     connect(socket, &QTcpSocket::readyRead, this, &TCPclient::ReadyReed);
-
-
+    connect(socket, &QTcpSocket::errorOccurred, this, [](QAbstractSocket::SocketError socketError){
+        qDebug() << "Ошибка сокета:" << socketError;
+    });
+    connect(socket, &QTcpSocket::bytesWritten, this, [](qint64 bytes){
+        qDebug() << "Данные успешно отправлены! Количество байт:" << bytes;
+    });
 }
 
 /* write
@@ -46,13 +62,11 @@ TCPclient::TCPclient(QObject *parent) : QObject(parent)
 */
 void TCPclient::SendRequest(ServiceHeader head)
 {
+
     QByteArray array;
     QDataStream data(&array, QIODevice::WriteOnly);
-
-    data << head.idData;
-
+    data << head;
     socket->write(array);
-
 
 }
 
@@ -61,7 +75,11 @@ void TCPclient::SendRequest(ServiceHeader head)
 */
 void TCPclient::SendData(ServiceHeader head, QString str)
 {
-
+    QByteArray array;
+    QDataStream data(&array, QIODevice::WriteOnly);
+    data << head;
+    data << str;
+    socket->write(array);
 
 }
 
@@ -92,7 +110,6 @@ void TCPclient::DisconnectFromHost()
 
 void TCPclient::ReadyReed()
 {
-
     QDataStream incStream(socket);
 
     if(incStream.status() != QDataStream::Ok){
@@ -160,15 +177,48 @@ void TCPclient::ProcessingData(ServiceHeader header, QDataStream &stream)
 
     switch (header.idData){
 
-        case GET_TIME:
-        qDebug() << "check";
-        case GET_SIZE:
-        case GET_STAT:
-        case SET_DATA:
-        case CLEAR_DATA:
+    case GET_TIME:
+    {
+        QDateTime time ;
+        stream >> time;
+        emit sig_sendTime(time);
+        break;
+    }
+
+    case GET_SIZE:
+    {
+        uint32_t size;
+        stream >> size;
+        emit sig_sendFreeSize(size);
+        break;
+    }
+
+    case GET_STAT:
+    {
+        StatServer date;
+        stream >> date;
+        emit sig_sendStat(date);
+        break;
+    }
+
+    case SET_DATA:
+    {
+        QString str;
+        stream >> str;
+        emit sig_SendReplyForSetData(str);
+        break;
+    }
+
+    case CLEAR_DATA:
+    {
+        emit sig_Clear();
+        break;
+    }
         default:
-            return;
+    {
+        return;
+    }
 
-        }
-
+    }
+    emit sig_Error(header.status);
 }

@@ -31,10 +31,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     });
     connect(client, &TCPclient::sig_connectStatus, this, &MainWindow::DisplayConnectStatus);
-
-
-
-
+    connect(client, &TCPclient::sig_sendTime, this, &MainWindow::DisplayTime);
+    connect(client, &TCPclient::sig_sendFreeSize, this, &MainWindow::DisplayFreeSpace);
+    connect(client, &TCPclient::sig_sendStat, this, &MainWindow::DisplayStat);
+    connect(client, &TCPclient::sig_SendReplyForSetData, this, &MainWindow::SetDataReply);
+    connect(client, &TCPclient::sig_Clear, this, &MainWindow::DisplayClear);
+    connect(client, &TCPclient::sig_Error, this, &MainWindow::DisplayError);
  /*
   * Соединяем сигналы со слотами
  */
@@ -52,42 +54,50 @@ MainWindow::~MainWindow()
  */
 void MainWindow::DisplayTime(QDateTime time)
 {
-
+    QString str = time.toString();
+    ui->tb_result->append("Текущие время и дата на сервере: " + str);
 }
+
 void MainWindow::DisplayFreeSpace(uint32_t freeSpace)
 {
-
+    QString str = QString::number(freeSpace);
+    ui->tb_result->append(str);
 }
+
 void MainWindow::SetDataReply(QString replyString)
 {
-
+    ui->tb_result->append(replyString);
 }
+
 void MainWindow::DisplayStat(StatServer stat)
 {
+    ui->tb_result ->append("Принято байт : " + QString::number(stat.incBytes));
+    ui->tb_result ->append("Передано байт : " + QString::number(stat.sendBytes));
+    ui->tb_result ->append("Принято пакетов : " + QString::number(stat.revPck));
+    ui->tb_result ->append("Передано пакетов : " + QString::number(stat.sendPck));
+    ui->tb_result ->append("Время работы сервера секунд : " + QString::number(stat.workTime));
+    ui->tb_result ->append("Количество подключенных клиентов : " + QString::number(stat.clients));
 
 }
+
 void MainWindow::DisplayError(uint16_t error)
 {
     switch (error) {
     case ERR_NO_FREE_SPACE:
-    case ERR_NO_FUNCT:
-    default:
+    {
+        ui->tb_result->append("Память на сервере переполнина");
         break;
     }
-}
-/*!
- * \brief Метод отображает квитанцию об успешно выполненном сообщениии
- * \param typeMess ИД успешно выполненного сообщения
- */
-void MainWindow::DisplaySuccess(uint16_t typeMess)
-{
-    switch (typeMess) {
-    case CLEAR_DATA:
+
+    case ERR_NO_FUNCT:
+        ui->tb_result->append("Функция не реализована");
+        break;
     default:
         break;
     }
 
 }
+
 
 /*!
  * \brief Метод отображает статус подключения
@@ -95,12 +105,14 @@ void MainWindow::DisplaySuccess(uint16_t typeMess)
 void MainWindow::DisplayConnectStatus(uint16_t status)
 {
 
-    if(status == ERR_CONNECT_TO_HOST){
+    if(status == ERR_CONNECT_TO_HOST)
+    {
 
         ui->tb_result->append("Ошибка подключения к порту: " + QString::number(ui->spB_port->value()));
 
     }
-    else{
+    else
+    {
         ui->lb_connectStatus->setText("Подключено");
         ui->lb_connectStatus->setStyleSheet("color: green");
         ui->pb_connect->setText("Отключиться");
@@ -119,7 +131,8 @@ void MainWindow::DisplayConnectStatus(uint16_t status)
  */
 void MainWindow::on_pb_connect_clicked()
 {
-    if(ui->pb_connect->text() == "Подключиться"){
+    if(ui->pb_connect->text() == "Подключиться")
+    {
 
         uint16_t port = ui->spB_port->value();
 
@@ -131,7 +144,8 @@ void MainWindow::on_pb_connect_clicked()
         client->ConnectToHost(QHostAddress(ip), port);
 
     }
-    else{
+    else
+    {
 
         client->DisconnectFromHost();
         ui->lb_connectStatus->setText("Отключено");
@@ -157,34 +171,45 @@ void MainWindow::on_pb_request_clicked()
    ServiceHeader header;
 
    header.id = ID;
-   header.status = STATUS_SUCCES;
    header.len = 0;
-   qDebug( ) << ui->cb_request->currentIndex();
    switch (ui->cb_request->currentIndex()){
 
        case 0:
-       header.status = GET_TIME; break;
+       header.idData = GET_TIME; break;
 
        case 1:
-       header.status = GET_SIZE; break;
+       header.idData = GET_SIZE; break;
 
        case 2:
-       header.status = GET_STAT; break;
+       header.idData = GET_STAT; break;
 
        case 3:
-       header.status = SET_DATA; break;
+       header.idData = SET_DATA; break;
 
        case 4:
-       header.status = CLEAR_DATA; break;
+       header.idData = CLEAR_DATA; break;
        default:
        ui->tb_result->append("Такой запрос не реализован в текущей версии");
        return;
 
    }
+       if(header.idData == SET_DATA){
+       QString str = ui->le_data->text();
+       uint32_t byteCount = static_cast<uint32_t>(str.toUtf8().size());
+       header.len = byteCount;
+       client->SendData(header, str);
+       }
+       else
+       {
+           client->SendRequest(header);
+       }
 
-   client->SendRequest(header);
 }
 
+void MainWindow::DisplayClear()
+{
+    ui->tb_result->append("Память успешно очищина!");
+}
 /*!
  * \brief Обработчик изменения индекса запроса
  */

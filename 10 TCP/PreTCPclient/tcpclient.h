@@ -19,16 +19,14 @@ public:
     void ConnectToHost(QHostAddress host, uint16_t port);
     void DisconnectFromHost(void);
 
-
 private slots:
-
-    void ReadyReed(void);
+    void ReadyReed();
     void ProcessingData(ServiceHeader header, QDataStream &stream);
+
 public slots:
     void ConnectedOn();
 
 private:
-
 QTcpSocket* socket;
 ServiceHeader servHeader;
 
@@ -40,7 +38,7 @@ signals:
     void sig_Error(uint16_t);
     void sig_connectStatus(uint16_t);
     void sig_Disconnected( void );
-    void sig_Success(uint16_t);
+    void sig_Clear();
 
 };
 
