@@ -3,6 +3,9 @@
 
 
 #include <QDialog>
+#include <QtCharts/QtCharts>
+#include <QtCharts/QBarSeries>
+#include <QtCharts/QChartView>
 namespace Ui {
 class workload;
 }
@@ -16,6 +19,9 @@ public:
     ~workload();
 
 private:
+    QChart* chart;
+    QChartView* chartView;
+    QBarSeries* series;
     Ui::workload *ui;
 };
 

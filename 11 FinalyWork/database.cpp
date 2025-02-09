@@ -14,7 +14,10 @@ DataBase::DataBase(QObject *parent)
 DataBase::~DataBase()
 {
     delete dataBase;
+    if(query)
+    {
     delete query;
+    }
 }
 
 void DataBase::addDataBase(QString driver, QString nameDB)
