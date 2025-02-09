@@ -4,6 +4,7 @@
 #include "database.h"
 #include <QMessageBox>
 #include <QTimer>
+#include "workload.h"
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -24,13 +25,20 @@ private slots:
     void slot_refresh_connection();
     void on_pushButton_clear__clicked();
 
+    void on_pushButton_flights__clicked();
+
+    void on_pushButton_workload__clicked();
+
 private:
     void myConnect();
     bool connectionStatus = false;;
-    Ui::MainWindow *ui;
-    DataBase* myDataBase;
-    QMessageBox* msg;
+    Ui::MainWindow * ui;
+    DataBase * myDataBase;
+    QMessageBox * msg;
     QVector<QString> dataForConnect;
     QTimer * timer;
+    workload * workloadDialog;
+
+
 };
 #endif // MAINWINDOW_H

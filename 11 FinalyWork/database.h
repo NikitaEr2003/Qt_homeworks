@@ -5,8 +5,8 @@
 #include <QSqlError>
 #include <QSqlTableModel>
 #include <QSqlQuery>
-
-
+#include <QSqlRecord>
+#include <QMap>
 #define POSTGRE_DRIVER "QPSQL"
 #define DB_NAME "MyDB"
 
@@ -42,6 +42,8 @@ public:
     QSqlError getLastError(void);
     void connectToDataBase(QVector<QString> dataForConnect);;
     bool isOpen();
+    QSqlQueryModel * getAirportsRequests(QString str, bool flag);
+    QMap<QString, QString>  mapCityAndCode;
 
 
 signals:
@@ -49,8 +51,10 @@ signals:
     void sig_SendStatusConnection(bool);
 
 private:
-    QSqlDatabase* dataBase;
-    QSqlQueryModel * modelQuery = nullptr;
+    QSqlQuery*query;
+    QSqlDatabase * dataBase;
+    QSqlQueryModel * modelQueryAirports = nullptr;
+    QSqlQueryModel * modelQueryFlights = nullptr;
 
 };
 
